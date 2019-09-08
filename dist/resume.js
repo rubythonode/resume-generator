@@ -12,6 +12,8 @@ function __extends(d, b) {
 
 function Loader(data) {
     var json = '{}';
+    if (!data)
+        return json;
     if (typeof data === 'object')
         return data;
     data.charAt(0) === '{' && data.charAt(data.length - 1) === '}' ? json = data : (function () {
@@ -28,12 +30,47 @@ function Loader(data) {
     return JSON.parse(json);
 }
 
+// IE not Support
+// export default function loadScript(src){
+//     return new Promise(function(resolve, reject) {
+//         const script = document.createElement('script');
+//         script.async = false;
+//         script.src = src;
+//         script.onload = resolve;
+//         script.onerror = reject;
+//         document.head.appendChild(script);
+//     });
+// }
+function loadScript(url, callback) {
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    if (script.readyState) {
+        script.onreadystatechange = function () {
+            if (script.readyState == 'loaded' || script.readyState == 'complete') {
+                script.onreadystatechange = null;
+                callback();
+            }
+        };
+    }
+    else
+        script.onload = function () { return callback(); };
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+}
+
 var Renderer = (function () {
-    function Renderer() {
+    function Renderer(parent) {
+        if (!parent)
+            throw 'invalid parent';
+        this.parent = parent;
     }
     Renderer.prototype.render = function (data) {
+        var _this = this;
         this.data = Loader(data);
-        this._render();
+        this.shadowDOM ? this._render() : (function () {
+            var attach = function () { _this.shadowDOM = _this.parent.attachShadow({ mode: 'open' }); _this._render(); };
+            !!HTMLElement.prototype.attachShadow ? attach() : loadScript('https://cdn.rawgit.com/webcomponents/shadydom/master/shadydom.min.js', function () { return loadScript('https://cdn.rawgit.com/webcomponents/shadycss/master/scoping-shim.min.js', function () { return attach(); }); });
+        })();
     };
     Renderer.prototype._render = function () {
         '_render override';
@@ -42,7 +79,7 @@ var Renderer = (function () {
 }());
 
 function Style() {
-    return "\n    <style>\n        @media(min-width: 600px){\n        .top-bar h2{ float:left;margin:0 }\n        .top-bar ul{ border-top: none !important; text-align: right !important; }\n        .top-content{ font-size:1.125rem }\n        }\n        *{ box-sizing: border-box; }\n        \n        :host{\n        display: block;\n        color: #333;\n        line-height: 1.5;\n        margin:0;\n        font-family : Arial, Helvetica, sans-serif;        \n        }\n\n        .wrapper {\n        max-width: 728px;\n        padding: 0 24px;\n        margin: 0 auto;\n        }\n\n        /* @ \uC0C1\uB2E8 \uD5E4\uB354\uB2E8\n        */\n        .top-header{\n        padding: 1.5rem 0; \n        }     \n    \n        .top-header h1{\n        text-align: center;\n        font-size: 2.4rem;\n        font-weight: 900;        \n        }\n        \n        .top-avatar {\n            width: 95px;\n            max-width: 100%;\n            overflow: hidden;\n            border-radius : 100px;\n            margin: 0 auto;\n            display: block;\n        }\n\n        .top-bar{\n        border-top: 4px solid #c7c7c7;\n        border-bottom: 2px solid #c7c7c7;\n        }\n\n        .top-bar h2{\n        font-weight: 300;\n        font-size: 1.75rem;\n        line-height: 2rem;\n        text-align: center;\n        margin: 0 0 .5rem;        \n        }\n\n        .top-bar ul{\n        margin: 0;\n        padding: 0;\n        position: relative;\n        top: 4px;\n        text-align: center;\n        border-top: 2px solid #c7c7c7;\n        padding-top: .4rem;\n        }\n\n        .top-bar li{\n        display: inline-block;\n        margin-left: 5px;\n        }\n        \n        .top-button{\n        border-radius : 3px;\n        background-color: #efefef;\n        text-decoration: none;\n        text-align: center;\n        display: block;\n        margin: 1.2rem auto;\n        width: 220px;\n        font-size: 1.375rem;\n        color: #333;\n        line-height: 55px;        \n        -webkit-transition:all 0.2s ease;\n        -moz-transition:all 0.2s ease;\n        transition:all 0.2s ease;\n        }\n        \n        .top-button:hover{\n        background-color:#333;\n        color:#fff;\n        }\n\n\n        /* @ \uC139\uD130\uB2E8\n        */\n        section{\n        margin: 0 0 3rem;\n        }\n\n        section header{\n        border-top: 4px solid #c7c7c7;\n        border-bottom: 2px solid #c7c7c7;\n        padding: .2rem 0 .4rem;\n        margin-bottom: 1.5rem;\n        }\n\n        section header h2{\n        font-weight: 900;\n        font-size: 1.75rem;\n        margin: 0;\n        }\n\n        section div{\n        margin-bottom: 2rem;\n        }\n\n        section h4{\n        font-size: 1.025rem;\n        margin: 0 0 .75rem;\n        line-height: 1;\n        }\n\n        section h3{\n        font-weight: 700;\n        margin: 0 0 .75rem;\n        font-size: 1.25rem;\n        line-height: 1;\n        }\n\n        section p{\n        margin: .75rem 0 0;\n        }\n\n        /* @ \uD478\uD130\uB2E8\n        */\n        footer{\n        border-top: 4px solid #c7c7c7;\n        padding-top: 1.5rem;\n        text-align: center;\n        margin-bottom: 3rem;\n        }\n\n        footer p{\n        margin: 0;\n        font-size: .875rem;\n        color: #999;\n        }\n\n        footer a{\n        font-weight: 700;\n        color: #333;\n        }\n\n        /* @ SVG \uC544\uC774\uCF58\n        */\n        a:hover svg path{\n        fill:#333;\n        -webkit-transition:all 0.2s ease;\n        -moz-transition:all 0.2s ease;\n        transition:all 0.2s ease;\n        }\n        \n        /* @ font Family\n        */\n        .top-header h1,\n        section h2{ \n        font-family : \"Arial Black\", Gadget, sans-serif;\n        }\n    \n        section h4{ \n        font-family : \"Courier New\", Courier, monospace;\t\n        }\n                     \n    </style>      \n    ";
+    return "\n    <style>\n        @media(min-width: 600px){\n        .top-bar h2{ float:left;margin:0 }\n        .top-bar ul{ border-top: none !important; text-align: right !important; }\n        .top-content{ font-size:1.125rem }\n        }\n        *{ box-sizing: border-box; }\n        \n        :host{\n        display: block;\n        color: #333;\n        line-height: 1.5;\n        margin:0;\n        font-family : Arial, Helvetica, sans-serif;        \n        }\n\n        .wrapper {\n        max-width: 728px;\n        padding: 0 24px;\n        margin: 0 auto;\n        }\n\n        /* @ \uC0C1\uB2E8 \uD5E4\uB354\uB2E8\n        */\n        .top-header{\n        padding: 1.5rem 0; \n        }     \n    \n        .top-header h1{\n        text-align: center;\n        font-size: 2.4rem;\n        font-weight: 900;        \n        }\n        \n        .top-avatar {\n            width: 95px;\n            max-width: 100%;\n            overflow: hidden;\n            border-radius : 100px;\n            margin: 0 auto;\n            display: block;\n        }\n\n        .top-bar{\n        border-top: 4px solid #c7c7c7;\n        border-bottom: 2px solid #c7c7c7;\n        }\n\n        .top-bar h2{\n        font-weight: 300;\n        font-size: 1.75rem;\n        line-height: 2rem;\n        text-align: center;\n        margin: 0 0 .5rem;        \n        }\n\n        .top-bar ul{\n        margin: 0;\n        padding: 0;\n        position: relative;\n        top: 4px;\n        text-align: center;\n        border-top: 2px solid #c7c7c7;\n        padding-top: .4rem;\n        }\n\n        .top-bar li{\n        display: inline-block;\n        margin-left: 5px;\n        }\n        \n        .top-button{\n        border-radius : 3px;\n        background-color: #efefef;\n        text-decoration: none;\n        text-align: center;\n        display: block;\n        margin: 1.2rem auto;\n        width: 220px;\n        font-size: 1.375rem;\n        color: #333;\n        line-height: 55px;        \n        -webkit-transition:all 0.2s ease;\n        -moz-transition:all 0.2s ease;\n        transition:all 0.2s ease;\n        }\n        \n        .top-button:hover{\n        background-color:#333;\n        color:#fff;\n        }\n\n\n        /* @ \uC139\uD130\uB2E8\n        */\n        section{\n        margin: 0 0 3rem;\n        }\n\n        section header{\n        border-top: 4px solid #c7c7c7;\n        border-bottom: 2px solid #c7c7c7;\n        padding: .2rem 0 .4rem;\n        margin-bottom: 1.5rem;\n        }\n\n        section header h2{\n        font-weight: 900;\n        font-size: 1.75rem;\n        margin: 0;\n        }\n\n        section div{\n        margin-bottom: 2rem;\n        }\n\n        section h4{\n        font-size: 1.025rem;\n        margin: 0 0 .75rem;\n        line-height: 1;\n        }\n\n        section h3{\n        font-weight: 700;\n        margin: 0 0 .75rem;\n        font-size: 1.25rem;\n        line-height: 1;\n        }\n\n        section p{\n        margin: .75rem 0 0;\n        }\n    \n        .skills-wrapper{\n        max-width:500px;\n        }\n\n        /* @ \uD478\uD130\uB2E8\n        */\n        footer{\n        border-top: 4px solid #c7c7c7;\n        padding-top: 1.5rem;\n        text-align: center;\n        margin-bottom: 3rem;\n        }\n\n        footer p{\n        margin: 0;\n        font-size: .875rem;\n        color: #999;\n        }\n\n        footer a{\n        font-weight: 700;\n        color: #333;\n        }\n\n        /* @ SVG \uC544\uC774\uCF58\n        */\n        a:hover svg path{\n        fill:#333;\n        -webkit-transition:all 0.2s ease;\n        -moz-transition:all 0.2s ease;\n        transition:all 0.2s ease;\n        }\n        \n        /* @ font Family\n        */\n        .top-header h1,\n        section h2{ \n        font-family : \"Arial Black\", Gadget, sans-serif;\n        }\n    \n        section h4{ \n        font-family : \"Courier New\", Courier, monospace;\t\n        }\n    \n        a{ \n        color: #333;\n        text-decoration:none;\n        }\n        \n    </style>\n    ";
 }
 
 var iconPath = {
@@ -77,7 +114,7 @@ function ProjectSection(data) {
     function item() {
         var result = '';
         data.map(function (data) {
-            var html = "\n                <div>\n                    <h3>" + (data.name || '') + "</a></h3>\n                    <h4>" + (data.date = data.date || {}, data.date.start || '') + " &mdash; " + (data.date.end || '') + "</h4>\n                    <p>" + (data.bio || '') + "</p>\n                </div>\n            ";
+            var html = "\n                <div>\n                    <a  " + (data.link ? 'href="' + data.link : '') + " \" target=\"_blank\" ><h3>" + (data.name || '') + "</a></h3></a>\n                    <h4>" + (data.date = data.date || {}, data.date.start || '') + " &mdash; " + (data.date.end || '') + "</h4>\n                    <p>" + (data.bio || '') + "</p>\n                </div>\n            ";
             result += html;
         });
         return result;
@@ -94,14 +131,14 @@ function SkillSection(data) {
         });
         return result;
     }
-    return " \n        <section>\n        <header>\n            <h2>Skills</h2>\n        </header>\n        " + item() + "         \n        </section>         \n    ";
+    return " \n        <section>\n        <header>\n            <h2>Skills</h2>\n        </header>\n        <div class=\"skills-wrapper\">\n            " + item() + "\n        </div>         \n        </section>         \n    ";
 }
 
 function ExperienceSection(data) {
     function item() {
         var result = '';
         data.map(function (data) {
-            var html = "\n                <div>\n                    <h3>" + (data.name || '') + "</a></h3>\n                    <h4>" + (data.job || '') + " &bull; " + (data.date = data.date || {}, data.date.start || '') + " &mdash; " + (data.date.end || '') + " - " + (data.address || '') + "</h4>\n                    <ul>\n                        " + list(data.bios || []) + "\n                    </ul>\n                </div>\n            ";
+            var html = "\n                <div>\n                    <a  " + (data.link ? 'href="' + data.link : '') + " \" target=\"_blank\" ><h3>" + (data.name || '') + "</a></h3></a>\n                    <h4>" + (data.job || '') + " &bull; " + (data.date = data.date || {}, data.date.start || '') + " &mdash; " + (data.date.end || '') + " - " + (data.address || '') + "</h4>\n                    <ul>\n                        " + list(data.bios || []) + "\n                    </ul>\n                </div>\n            ";
             result += html;
         });
         return result;
@@ -123,11 +160,11 @@ function EduAndCertSection(data) {
         data.edu = data.edu || [];
         data.cert = data.cert || [];
         data.edu.map(function (data) {
-            var html = "\n                 <h3>" + (data.title || '') + "</h3>\n                 <h4>" + (data.name || '') + " &bull; " + (data.date = data.date || {}, data.date.start || '') + " - " + (data.date.end || '') + "</h4>\n             ";
+            var html = "\n                 <a  " + (data.link ? 'href="' + data.link : '') + " \" target=\"_blank\" ><h3>" + (data.title || '') + "</a></h3></a>\n                 <h4>" + (data.name || '') + " &bull; " + (data.date = data.date || {}, data.date.start || '') + " - " + (data.date.end || '') + "</h4>\n             ";
             edu += html;
         });
         data.cert.map(function (data) {
-            var html = "\n                <h3>" + (data.title || '') + "</h3>\n                <h4>" + (data.name || '') + " &bull; " + (data.date || '') + "</h4>\n            ";
+            var html = "\n                <a  " + (data.link ? 'href="' + data.link : '') + " \" target=\"_blank\" ><h3>" + (data.title || '') + "</a></h3></a>\n                <h4>" + (data.name || '') + " &bull; " + (data.date || '') + "</h4>\n            ";
             cert += html;
         });
         return "\n            <div>\n                " + (edu || '') + "\n                " + (cert || '') + "\n            </div>         \n        ";
@@ -168,23 +205,19 @@ function Template(element, data) {
     return "\n        " + Style() + "\n        <div class=\"wrapper\">\n          <!-- \uC0C1\uB2E8 \uD5E4\uB354 -->\n          " + Template$1(data.header || {}) + "\n          <!-- \uD504\uB85C\uC81D\uD2B8 \uC139\uC158 -->\n          " + ProjectSection(data.projects || []) + "\n          <!-- \uAE30\uC220 \uC139\uC158 -->\n          " + SkillSection(data.skills || []) + "\n          <!-- \uACBD\uD5D8 \uC139\uC158 -->\n          " + ExperienceSection(data.experience || []) + " \n          <!-- \uAD50\uC721 \uBC0F \uC778\uC99D \uC139\uC158 -->\n          " + EduAndCertSection(data.eduandcert || {}) + "\n          <!-- \uD558\uB2E8 \uD478\uD130 -->\n          " + Footer(data.footer || {}) + "\n          <!-- \uBE4C\uB354 -->\n          " + isLive(data.footer || {}) + "\n        </div>        \n        ";
 }
 
-var Resume$1 = (function (_super) {
-    __extends(Resume, _super);
-    function Resume(parent) {
-        _super.call(this);
-        if (!parent)
-            throw 'invalid parent';
-        this.parent = parent;
+var ResumeRenderer$1 = (function (_super) {
+    __extends(ResumeRenderer, _super);
+    function ResumeRenderer(parent) {
+        _super.call(this, parent);
     }
-    Resume.prototype._render = function () {
+    ResumeRenderer.prototype._render = function () {
         if (!this.parent)
             throw 'invalid parent element';
-        this.shadowDOM = this.parent.attachShadow({ mode: 'open' });
         this.shadowDOM.innerHTML = Template(this.shadowDOM, this.data);
     };
-    return Resume;
+    return ResumeRenderer;
 }(Renderer));
 
-return Resume$1;
+return ResumeRenderer$1;
 
 })));

@@ -133,6 +133,10 @@ export default function Style(){
         section p{
         margin: .75rem 0 0;
         }
+    
+        .skills-wrapper{
+        max-width:500px;
+        }
 
         /* @ 푸터단
         */
@@ -173,8 +177,13 @@ export default function Style(){
         section h4{ 
         font-family : "Courier New", Courier, monospace;	
         }
-                     
-    </style>      
+    
+        a{ 
+        color: #333;
+        text-decoration:none;
+        }
+        
+    </style>
     `;
 
 }

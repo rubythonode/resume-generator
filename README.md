@@ -1,19 +1,35 @@
+# resume-maker
+
+[![NPM Version](https://img.shields.io/npm/v/resume-maker.svg)](https://www.npmjs.com/package/resume-maker)
+
+[![NPM Badge](https://nodei.co/npm/resume-maker.png?downloads=true)](https://www.npmjs.com/package/resume-maker)
+
 ![Alt text](https://drive.google.com/uc?export=view&id=0B3XkfYbZArSfdTc4ZVV4X0V0UGc)
 
-##### install
-```
-npm install
+## Install
+
+```bash
+$ git clone https://github.com/u4bi-dev/resume-maker.git resume
 ```
 
-##### build
+```bash
+$ npm install
 ```
-npm run build
+
+## build
+
+```bash
+$ npm run build
 ```
 
 ##### resume.js
+
+```html
+<script src="https://cdn.rawgit.com/u4bi-dev/resume-maker/master/dist/resume.js"></script>
+```
 ```javascript
-    const resume = new Resume(element);
-    resume.render(data); // HTTP Link , JSON Object, JSON String
+var resume = new Resume(element);
+resume.render(data); // HTTP Link , JSON Object, JSON String
 ```
 
 ##### JSON Rule
@@ -37,6 +53,7 @@ npm run build
     "projects" : [
         {
             "name" : "Test Project 1",
+            "link" : "https://github.com/u4bi",
             "date" : {
                 "start" : "2017/09/06",
                 "end"   : "2017/09/07"
@@ -56,6 +73,7 @@ npm run build
     "experience" : [
         {
             "name" : "Test Company 1",
+            "link" : "https://github.com/u4bi",
             "job"  : "Frontend Developer",
             "date" : {
                 "start" : "2017/09/06",
@@ -64,7 +82,7 @@ npm run build
             "address" : "Yeoksam, Seoul",
             "bios" : [
                 "Test Comment 1",
-                "Test Comment 2",
+                "Test Comment 2"
             ]
         }
     ],
@@ -72,6 +90,7 @@ npm run build
         "edu" : [
             {
                 "title" : "Test College",
+                "link" : "https://github.com/u4bi",
                 "name"  : "Test lang",
                 "date" : {
                     "start" : "2017/09/06",
@@ -83,6 +102,7 @@ npm run build
         "cert" : [
             {
                 "title" : "Test Campus",
+                "link" : "https://github.com/u4bi",
                 "name" : "Test lang",
                 "date" : "2017/09/07"
             }
@@ -95,3 +115,7 @@ npm run build
 }
 
 ```
+
+## License
+
+[MIT](LICENSE)
